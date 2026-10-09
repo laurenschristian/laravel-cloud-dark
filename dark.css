@@ -1,0 +1,258 @@
+/* Invert the page, then re-invert media so images and logos keep real colors. */
+html:is([data-lcd="dark"], [data-lcd="light"]) {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+html:is([data-lcd="dark"], [data-lcd="light"]) :is(img, video, picture, canvas, iframe, [style*="background-image"], [data-lcd-primary]) {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+html[data-lcd="dark"] {
+  background: #fff !important;
+  color-scheme: dark;
+}
+html[data-lcd="light"] {
+  background: #000 !important;
+  color-scheme: light;
+}
+
+/* Pre-inversion multiply tint: white lands on a navy-tinted dark, oklch(0.178 0.02 264). */
+html[data-lcd="dark"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  background: #eaeff8;
+  mix-blend-mode: multiply;
+}
+
+@media (min-width: 1280px) {
+  [data-lcd-apps] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+[data-lcd-apps] {
+  gap: 1rem !important;
+}
+[data-lcd-apps] > * {
+  border-radius: 6px !important;
+  transition: border-color 150ms, transform 150ms;
+}
+[data-lcd-apps] > *:hover {
+  border-color: rgb(0 0 0 / 0.25) !important;
+  transform: translateY(-1px);
+}
+[data-lcd-apps] > * :is(code, kbd, [class*="mono"]) {
+  font-size: 0.75rem !important;
+  padding: 1px 6px !important;
+  border-radius: 3px !important;
+}
+
+/* Styled for the light page; the inversion flips it to match dark mode. */
+.lcd-switch {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-right: 8px;
+  padding: 3px;
+  border: 1px solid rgb(0 0 0 / 0.1);
+  border-radius: 5px;
+  background: rgb(0 0 0 / 0.03);
+}
+.lcd-switch button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 100%;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: rgb(0 0 0 / 0.45);
+  cursor: pointer;
+  transition: color 120ms, background 120ms;
+}
+.lcd-switch button:hover {
+  color: rgb(0 0 0 / 0.8);
+}
+.lcd-switch button[aria-checked="true"] {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
+}
+
+[data-lcd-repo] {
+  cursor: pointer;
+}
+[data-lcd-repo]:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+[data-lcd-row] {
+  display: flex !important;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  margin-top: 12px !important;
+  white-space: nowrap;
+}
+[data-lcd-row] > * {
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+[data-lcd-row] > :nth-child(2) {
+  flex-shrink: 1;
+  min-width: 0;
+}
+/* Drop the "Deployed" prefix text node; the time keeps its size. */
+[data-lcd-row] > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+[data-lcd-row] > :last-child > .shrink-0 {
+  margin-left: auto;
+  font-size: 0;
+}
+[data-lcd-row] time {
+  font-size: 0.875rem;
+}
+[data-lcd-row] [data-lcd-repo] {
+  display: none !important;
+}
+/* Domain becomes an "open in new tab" icon; hover shows the host. */
+[data-lcd-row] > :has([data-lcd-site]) > svg {
+  display: none;
+}
+[data-lcd-site] {
+  display: block !important;
+  width: 16px;
+  height: 16px;
+  font-size: 0 !important;
+  opacity: 0.55;
+  background: center / 16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'/%3E%3C/svg%3E");
+}
+[data-lcd-site]:hover {
+  opacity: 1;
+}
+/* Card header: app name left, environment right, no dot between. */
+[data-lcd-apps] [data-test="environment-card"] span.text-weaker {
+  display: none;
+}
+[data-lcd-apps] [data-test="environment-card"] div:has(> h2) {
+  margin-left: auto;
+}
+
+[data-lcd-tip] {
+  position: relative;
+}
+[data-lcd-tip]:hover::after {
+  content: attr(data-lcd-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 50;
+  transform: translateX(-50%);
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #111;
+  color: #fff;
+  font: 500 12px/1.4 ui-sans-serif, system-ui, sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+[data-lcd-gh] {
+  cursor: pointer;
+}
+[data-lcd-branch] {
+  cursor: pointer;
+}
+[data-lcd-branch]:hover {
+  text-decoration: underline;
+}
+
+[data-lcd-deploys] {
+  position: relative;
+}
+.lcd-seg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+}
+.lcd-seg button {
+  width: auto;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+/* Deploy list: drop "Deployed from <branch>" so the commit title gets the room; tag envs with their color. */
+tr[data-test="deployment-row"] > td:last-child p > span:nth-child(-n + 2) {
+  display: none !important;
+}
+a[data-lcd-env]::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background: var(--lcd-env);
+  vertical-align: -1px;
+}
+tr[data-lcd-off] {
+  display: none !important;
+}
+
+/* Toasts: bottom-right instead of bottom-center over the deploy list. */
+div.pointer-events-none.fixed.bottom-0[class*="left-1/2"] {
+  left: auto !important;
+  right: 24px !important;
+  bottom: 24px !important;
+  width: auto !important;
+  transform: none !important;
+  translate: none !important;
+}
+div.pointer-events-none.fixed.bottom-0[class*="left-1/2"] > div {
+  align-items: flex-end !important;
+}
+
+[data-lcd-tight] {
+  padding-top: 1.5rem !important;
+}
+[data-lcd-hidden] {
+  display: none !important;
+}
+[data-lcd-primary] {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #fff !important;
+  transition: background 120ms;
+}
+[data-lcd-primary]:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+[data-lcd-primary] :is(*, ::before, ::after),
+[data-lcd-primary]::before,
+[data-lcd-primary]::after {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+/* Tighter corners site-wide: Cloud's Tailwind radius tokens plus its one-off 11px card overlay. */
+html:root {
+  --radius-xs: 2px !important;
+  --radius-sm: 3px !important;
+  --radius-md: 4px !important;
+  --radius-lg: 6px !important;
+  --radius-xl: 8px !important;
+  --radius-2xl: 10px !important;
+}
+[class*="rounded-[11px]"] {
+  border-radius: 8px !important;
+}
