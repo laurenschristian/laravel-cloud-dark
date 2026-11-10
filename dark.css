@@ -25,13 +25,9 @@ html[data-lcd="dark"]::after {
   mix-blend-mode: multiply;
 }
 
-@media (min-width: 1280px) {
-  [data-lcd-apps] {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-
+/* auto-fit drops empty tracks, so two cards stretch to the full width and more cards wrap. */
 [data-lcd-apps] {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
   gap: 1rem !important;
 }
 [data-lcd-apps] > * {
@@ -224,6 +220,16 @@ div.pointer-events-none.fixed.bottom-0[class*="left-1/2"] > div {
 }
 [data-lcd-hidden] {
   display: none !important;
+}
+[data-lcd-push] {
+  margin-left: auto !important;
+}
+html[data-lcd="dark"] [data-lcd-decor] {
+  visibility: hidden !important;
+}
+/* Darker before the page inversion means brighter on screen. */
+html[data-lcd="dark"] [data-lcd-spark] {
+  filter: brightness(0.5) !important;
 }
 [data-lcd-primary] {
   background: #2563eb !important;

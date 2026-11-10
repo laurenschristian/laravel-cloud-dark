@@ -10,20 +10,19 @@
 
 - **Dark mode** that follows the macOS appearance, with a soft navy tint.
 - **Theme switch** next to Search in the header: Light, Dark or System. Your choice is remembered.
-- **3-column app grid** for "Recently deployed" on screens 1280px and wider.
-- **Production first**: cards sort Production, then Staging, then the rest.
-- **One-row cards**: GitHub icon, open-site icon, branch and deploy time on one line. The branch opens on GitHub. Icons show a tooltip on hover.
+- **Production first**: the applications table sorts Production, then Staging, then the rest.
+- **Readable overview**: brighter request charts, and no glaring banners on empty states.
 - **Deploy list filter**: All, Production or Staging. Each row shows its environment color and the full commit title.
 - **Deploy status in the tab icon**: a blue dot while a deploy runs, a red dot when the last deploy of an environment failed.
 - **Tighter layout**: smaller corners site-wide, less space at the top, toasts in the bottom-right corner.
-- **Less noise**: the large org title above "Recently deployed" is hidden.
+- **Less noise**: the large org title on the overview is hidden.
 - **Primary button**: "New application" is bright blue.
 
 Images, logos and avatars keep their real colors in dark mode.
 
 <p align="center"><img src="screenshots/light.png" width="720" alt="The same overview in light mode"></p>
 
-Screenshots use a demo "Acme" org.
+Screenshots use a demo "Acme" org and show the previous Laravel Cloud overview.
 
 ## Install
 
@@ -41,7 +40,7 @@ To update, pull the latest changes and click the reload icon on the extension ca
 
 - `dark.js` compares the page theme with your preference. If they differ, it sets `data-lcd` on `<html>`.
 - `dark.css` inverts the page for that attribute, then inverts images again so they keep their colors.
-- Laravel Cloud has no stable class names, so the script finds elements by their text ("Recently deployed", "Search", "New application") and tags them with `data-lcd-*` attributes. The CSS styles those attributes.
+- Laravel Cloud has no stable class names, so the script finds elements by their text ("Search", "New application", "No active alerts") and tags them with `data-lcd-*` attributes. The CSS styles those attributes.
 - A `MutationObserver` reapplies the tags after in-app navigation.
 
 ## Privacy

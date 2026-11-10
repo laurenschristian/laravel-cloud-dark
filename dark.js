@@ -41,8 +41,75 @@ let queued = false;
 new MutationObserver(() => {
   if (queued) return;
   queued = true;
-  requestAnimationFrame(() => ((queued = false), tagAppGrid(), tagOverview(), sortApps(), compactCards(), linkRepos(), mountSwitch(), mountEnvFilter(), tagRows()));
+  requestAnimationFrame(() => ((queued = false), tagAppGrid(), tagOverview(), sortApps(), sortAppRows(), hideOrgTitle(), hideEmptyStateArt(), tagSparklines(), compactCards(), linkRepos(), mountSwitch(), mountEnvFilter(), tagRows()));
 }).observe(root, { childList: true, subtree: true });
+
+const leaves = (re, scope = document.body) => [...scope.querySelectorAll('*:not(:has(*))')].filter((n) => re.test(n.textContent.trim()));
+const envLabel = /^(?:·\s*)?(Production|Staging)$/;
+
+// The overview is a table now. Moving rows within their parent is safe: React still finds each node.
+function sortAppRows() {
+  const rowOf = (leaf) => {
+    let el = leaf;
+    while (el && el !== document.body && !/errors/.test(el.textContent)) el = el.parentElement;
+    return el === document.body ? null : el;
+  };
+  const list = leaves(envLabel).map(rowOf).find(Boolean)?.parentElement;
+  // Guards against a page section that merely mentions errors being treated as a row.
+  if (!list || list.children.length < 2 || ![...list.children].every((row) => /errors/.test(row.textContent))) return;
+  const ranks = new Map([...list.children].map((row) => [row, envRank[leaves(envLabel, row)[0]?.textContent.trim().match(envLabel)[1]] ?? 2]));
+  const rows = [...list.children];
+  const sorted = [...rows].sort((a, b) => ranks.get(a) - ranks.get(b));
+  if (sorted.some((row, i) => row !== rows[i])) list.append(...sorted);
+}
+
+// The title shares a row with Search and New application, so hide only the title.
+function hideOrgTitle() {
+  if (document.querySelector('[data-lcd-push]')) return;
+  const button = document.querySelector('[data-lcd-primary]');
+  const header = document.querySelector('header');
+  if (!button || !header) return;
+  const b = button.getBoundingClientRect();
+  for (let c = button; c.parentElement && c.parentElement !== document.body; c = c.parentElement) {
+    const title = [...c.parentElement.children].find((k) => {
+      const r = k.getBoundingClientRect();
+      const text = k.textContent.trim();
+      return k !== c && text && header.textContent.includes(text) && !k.querySelector('input') && r.top < b.bottom && r.bottom > b.top;
+    });
+    if (title) return (title.dataset.lcdHidden = ''), (c.dataset.lcdPush = '');
+  }
+}
+
+// The dithered banner above empty states stays glaring however it is inverted.
+function hideEmptyStateArt() {
+  const isArt = (k, width) => {
+    const r = k.getBoundingClientRect();
+    return !k.textContent.trim() && !k.querySelector('a, button, input') && r.width >= width * 0.9 && r.height >= 60;
+  };
+  for (const text of leaves(/^No \w+/)) {
+    for (let p = text.parentElement, i = 0; p && i < 6; p = p.parentElement, i++) {
+      const art = [...p.children].filter((k) => isArt(k, p.getBoundingClientRect().width));
+      if (art.length) {
+        art.forEach((k) => (k.dataset.lcdDecor = ''));
+        break;
+      }
+    }
+  }
+}
+
+function tagSparklines() {
+  for (const text of leaves(/errors$/)) {
+    for (let cell = text.parentElement, i = 0; cell && i < 4; cell = cell.parentElement, i++) {
+      const svgs = [...cell.querySelectorAll('svg')].filter((s) => s.getBoundingClientRect().width >= 60);
+      const divs = [...cell.querySelectorAll('div:not(:has(*)), span:not(:has(*))')].filter((n) => !n.textContent.trim() && n.getBoundingClientRect().width <= 12);
+      const bars = svgs.length ? svgs : divs.length >= 8 ? divs : [];
+      if (bars.length) {
+        bars.forEach((n) => (n.dataset.lcdSpark = ''));
+        break;
+      }
+    }
+  }
+}
 
 // Hide the org title above "Recently deployed" and mark the New application button as primary.
 function tagOverview() {

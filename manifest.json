@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Laravel Cloud Dark",
-  "version": "1.7.0",
+  "version": "1.9.0",
   "description": "Dark mode, a light/dark/system switch and a cleaner dashboard for Laravel Cloud.",
   "content_scripts": [
     {
