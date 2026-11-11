@@ -262,3 +262,12 @@ html:root {
 [class*="rounded-[11px]"] {
   border-radius: 8px !important;
 }
+
+/* Production, then Staging, then the rest; CSS order survives React re-renders. */
+[data-lcd-rows] {
+  display: flex !important;
+  flex-direction: column !important;
+}
+:is([data-lcd-rows], [data-lcd-apps]) > [data-lcd-rank="0"] { order: 0 !important; }
+:is([data-lcd-rows], [data-lcd-apps]) > [data-lcd-rank="1"] { order: 1 !important; }
+:is([data-lcd-rows], [data-lcd-apps]) > [data-lcd-rank="2"] { order: 2 !important; }

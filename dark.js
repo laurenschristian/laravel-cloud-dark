@@ -47,7 +47,7 @@ new MutationObserver(() => {
 const leaves = (re, scope = document.body) => [...scope.querySelectorAll('*:not(:has(*))')].filter((n) => re.test(n.textContent.trim()));
 const envLabel = /^(?:·\s*)?(Production|Staging)$/;
 
-// The overview is a table now. Moving rows within their parent is safe: React still finds each node.
+// Order rows with CSS instead of moving nodes: React re-renders put moved nodes back, so rows jumped on reload.
 function sortAppRows() {
   const rowOf = (leaf) => {
     let el = leaf;
@@ -57,10 +57,16 @@ function sortAppRows() {
   const list = leaves(envLabel).map(rowOf).find(Boolean)?.parentElement;
   // Guards against a page section that merely mentions errors being treated as a row.
   if (!list || list.children.length < 2 || ![...list.children].every((row) => /errors/.test(row.textContent))) return;
-  const ranks = new Map([...list.children].map((row) => [row, envRank[leaves(envLabel, row)[0]?.textContent.trim().match(envLabel)[1]] ?? 2]));
   const rows = [...list.children];
-  const sorted = [...rows].sort((a, b) => ranks.get(a) - ranks.get(b));
-  if (sorted.some((row, i) => row !== rows[i])) list.append(...sorted);
+  for (const row of rows) {
+    const rank = String(envRank[leaves(envLabel, row)[0]?.textContent.trim().match(envLabel)[1]] ?? 2);
+    if (row.dataset.lcdRank !== rank) row.dataset.lcdRank = rank;
+  }
+  // Real table rows ignore CSS order, so those still get moved; the stable sort keeps Cloud's order within a rank.
+  if (getComputedStyle(rows[0]).display === 'table-row') {
+    const sorted = [...rows].sort((a, b) => a.dataset.lcdRank - b.dataset.lcdRank);
+    if (sorted.some((row, i) => row !== rows[i])) list.append(...sorted);
+  } else list.dataset.lcdRows = '';
 }
 
 // The title shares a row with Search and New application, so hide only the title.
@@ -132,9 +138,9 @@ function sortApps() {
   const grid = document.querySelector('[data-lcd-apps]');
   if (!grid) return;
   for (const card of grid.children) {
-    if (card.dataset.lcdRank) continue;
     const env = [...card.querySelectorAll('*')].find((n) => !n.children.length && n.textContent.trim() in envRank);
-    card.dataset.lcdRank = card.style.order = env ? envRank[env.textContent.trim()] : 2;
+    const rank = String(env ? envRank[env.textContent.trim()] : 2);
+    if (card.dataset.lcdRank !== rank) card.dataset.lcdRank = rank;
   }
 }
 
