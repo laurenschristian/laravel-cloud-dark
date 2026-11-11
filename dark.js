@@ -39,6 +39,8 @@ function tagAppGrid() {
 
 let queued = false;
 new MutationObserver(() => {
+  // Sort table rows before paint (observer callbacks run before rendering), so the unsorted order never shows.
+  sortTableRows();
   if (queued) return;
   queued = true;
   requestAnimationFrame(() => ((queued = false), tagAppGrid(), tagOverview(), sortApps(), sortAppRows(), hideOrgTitle(), hideEmptyStateArt(), tagSparklines(), compactCards(), linkRepos(), mountSwitch(), mountEnvFilter(), tagRows()));
@@ -46,6 +48,16 @@ new MutationObserver(() => {
 
 const leaves = (re, scope = document.body) => [...scope.querySelectorAll('*:not(:has(*))')].filter((n) => re.test(n.textContent.trim()));
 const envLabel = /^(?:·\s*)?(Production|Staging)$/;
+
+function sortTableRows() {
+  for (const body of document.querySelectorAll('tbody')) {
+    const rows = [...body.children];
+    if (rows.length < 2 || !rows.every((row) => /errors/.test(row.textContent))) continue;
+    for (const row of rows) row.dataset.lcdRank = envRank[leaves(envLabel, row)[0]?.textContent.trim().match(envLabel)[1]] ?? 2;
+    const sorted = [...rows].sort((a, b) => a.dataset.lcdRank - b.dataset.lcdRank);
+    if (sorted.some((row, i) => row !== rows[i])) body.append(...sorted);
+  }
+}
 
 // Order rows with CSS instead of moving nodes: React re-renders put moved nodes back, so rows jumped on reload.
 function sortAppRows() {
