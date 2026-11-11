@@ -52,7 +52,8 @@ const envLabel = /^(?:·\s*)?(Production|Staging)$/;
 function sortTableRows() {
   for (const body of document.querySelectorAll('tbody')) {
     const rows = [...body.children];
-    if (rows.length < 2 || !rows.every((row) => /errors/.test(row.textContent))) continue;
+    // Match on the env label only: the errors column loads later, and waiting for it caused the jump.
+    if (rows.length < 2 || !rows.every((row) => leaves(envLabel, row).length)) continue;
     for (const row of rows) row.dataset.lcdRank = envRank[leaves(envLabel, row)[0]?.textContent.trim().match(envLabel)[1]] ?? 2;
     const sorted = [...rows].sort((a, b) => a.dataset.lcdRank - b.dataset.lcdRank);
     if (sorted.some((row, i) => row !== rows[i])) body.append(...sorted);
